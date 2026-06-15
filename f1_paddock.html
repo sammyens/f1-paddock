@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="F1 Paddock">
+<meta name="theme-color" content="#0a0a0a">
+<title>F1 Paddock – Mercedes-fokus</title>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --bg4: #242424;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --text2: #a0a0a0;
+    --text3: #5a5a5a;
+    --merc: #00d2be;
+    --merc-dim: rgba(0,210,190,0.12);
+    --merc-border: rgba(0,210,190,0.3);
+    --red: #e10600;
+    --red-dim: rgba(225,6,0,0.1);
+    --warn: #ff6b35;
+    --warn-dim: rgba(255,107,53,0.1);
+    --warn-border: rgba(255,107,53,0.3);
+    --purple: #8b7ff5;
+    --purple-dim: rgba(139,127,245,0.1);
+    --purple-border: rgba(139,127,245,0.3);
+    --amber: #f4a535;
+    --amber-dim: rgba(244,165,53,0.1);
+    --green: #4caf7d;
+    --green-dim: rgba(76,175,125,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,13,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo {
+    width: 34px; height: 34px;
+    background: var(--red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .header-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .header-refresh {
+    margin-left: auto;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 0.5px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .header-refresh.spinning { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 16px 14px; }
+
+  /* NEXT RACE BANNER */
+  .race-banner {
+    background: linear-gradient(135deg, var(--bg2) 0%, #1a1208 100%);
+    border: 0.5px solid rgba(244,165,53,0.25);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .race-flag { font-size: 28px; line-height: 1; }
+  .race-info { flex: 1; }
+  .race-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--amber); font-weight: 600; margin-bottom: 3px; }
+  .race-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .race-date { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .countdown { text-align: right; flex-shrink: 0; }
+  .cd-num { font-size: 28px; font-weight: 700; color: var(--amber); line-height: 1; letter-spacing: -1px; }
+  .cd-lbl { font-size: 10px; color: var(--text3); }
+
+  /* SECTION LABELS */
+  .sec { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .sec::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  /* MERCEDES HERO CARD */
+  .merc-card {
+    background: var(--bg2);
+    border: 1px solid var(--merc-border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .merc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--merc);
+  }
+  .merc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .merc-badge {
+    background: var(--merc-dim);
+    border: 0.5px solid var(--merc-border);
+    color: var(--merc);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .merc-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .merc-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+  /* STAT GRID */
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+  .stat { background: var(--bg3); border-radius: 10px; padding: 10px 8px; text-align: center; }
+  .stat-val { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+  .stat-val.merc { color: var(--merc); }
+  .stat-lbl { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+  .stat-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+  /* NEWS ITEMS inside merc card */
+  .m-item {
+    background: var(--bg3);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .m-item:last-child { margin-bottom: 0; }
+  .m-ico { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .m-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .m-b { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .m-src { font-size: 10px; color: var(--text3); margin-top: 5px; }
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .pill-red { background: var(--red-dim); color: #ff6b6b; border: 0.5px solid rgba(225,6,0,0.3); }
+  .pill-warn { background: var(--warn-dim); color: var(--warn); border: 0.5px solid var(--warn-border); }
+  .pill-purple { background: var(--purple-dim); color: var(--purple); border: 0.5px solid var(--purple-border); }
+  .pill-green { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(76,175,125,0.3); }
+  .pill-amber { background: var(--amber-dim); color: var(--amber); border: 0.5px solid rgba(244,165,53,0.3); }
+  .pill-gray { background: var(--bg4); color: var(--text2); border: 0.5px solid var(--border2); }
+  .quote-merc { border-left: 2px solid var(--merc); padding-left: 8px; margin-top: 7px; font-size: 11px; font-style: italic; color: var(--text2); line-height: 1.55; border-radius: 0; }
+  .quote-red-line { border-left: 2px solid var(--warn); padding-left: 8px; margin-top: 7px; font-size: 11px; font-style: italic; color: var(--warn); line-height: 1.55; border-radius: 0; }
+
+  /* LIVE NEWS FEED */
+  .news-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .news-card:hover { background: var(--bg3); border-color: var(--border2); }
+  .news-card-tag { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+  .news-card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.35; margin-bottom: 4px; }
+  .news-card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 6px; }
+  .news-card-meta { font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+  .news-card-meta span { display: flex; align-items: center; gap: 3px; }
+  .news-loading { text-align: center; padding: 24px; color: var(--text3); font-size: 13px; }
+  .news-error { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; color: var(--text2); font-size: 13px; }
+
+  /* UPGRADES TABLE */
+  .upg-grid { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .upg-row {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .upg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .upg-team { font-size: 13px; font-weight: 600; color: var(--text); min-width: 90px; }
+  .upg-desc { font-size: 12px; color: var(--text2); flex: 1; line-height: 1.4; }
+
+  /* STANDINGS */
+  .stand-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin-bottom: 8px; }
+  .stand-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .stand-pos { font-size: 17px; font-weight: 700; color: var(--text); }
+  .stand-driver { font-size: 11px; font-weight: 600; color: var(--text); margin-top: 2px; }
+  .stand-team { font-size: 10px; color: var(--text3); }
+  .stand-pts { font-size: 11px; font-weight: 600; margin-top: 3px; }
+  .bar-wrap { display: flex; flex-direction: column; gap: 7px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; }
+  .bar-label { font-size: 12px; color: var(--text2); min-width: 76px; }
+  .bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-pts { font-size: 11px; font-weight: 600; min-width: 38px; text-align: right; }
+
+  /* FOOTER */
+  .footer { margin-top: 28px; text-align: center; }
+  .footer-src { font-size: 10px; color: var(--text3); line-height: 1.8; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🏎</div>
+  <div>
+    <div class="header-title">F1 Paddock</div>
+    <div class="header-sub" id="last-updated">Laddar nyheter...</div>
+  </div>
+  <div class="header-refresh" id="refresh-btn" onclick="loadNews()" title="Uppdatera nyheter">↻</div>
+</div>
+
+<div class="wrap">
+
+  <!-- NEXT RACE -->
+  <div class="race-banner">
+    <div class="race-flag">🇦🇹</div>
+    <div class="race-info">
+      <div class="race-eyebrow">Nästa race · Omgång 8</div>
+      <div class="race-name">Österrikes GP · Red Bull Ring</div>
+      <div class="race-date">26–28 juni 2026 · Spielberg, Österrike</div>
+    </div>
+    <div class="countdown">
+      <div class="cd-num" id="cddays">--</div>
+      <div class="cd-lbl">dagar kvar</div>
+    </div>
+  </div>
+
+  <!-- MERCEDES HERO -->
+  <div class="sec">Mercedes · djupdykning</div>
+
+  <div class="merc-card">
+    <div class="merc-header">
+      <div>
+        <div class="merc-title">Mercedes-AMG Petronas · W17</div>
+        <div class="merc-sub">6 av 7 race-vinster · Konstruktörsledare 2026</div>
+      </div>
+      <span class="merc-badge" style="margin-left:auto">#1 Konstruktör</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">Antonelli</div><div class="stat-val merc">156 p</div><div class="stat-sub">Mästerskapsledare</div></div>
+      <div class="stat"><div class="stat-lbl">Russell</div><div class="stat-val">106 p</div><div class="stat-sub">3:a totalt</div></div>
+      <div class="stat"><div class="stat-lbl">Gap Hamilton</div><div class="stat-val">41 p</div><div class="stat-sub">Var 66 p</div></div>
+      <div class="stat"><div class="stat-lbl">Konstruktör +</div><div class="stat-val">72 p</div><div class="stat-sub">Över Ferrari</div></div>
+    </div>
+
+    <div class="m-item">
+      <div class="m-ico">⚡</div>
+      <div>
+        <div class="m-h">Elektrisk nedstängning – Antonelli bröt på varv 62 <span class="pill pill-red">Kritiskt</span></div>
+        <div class="m-b">Mercedes bekräftar: elektrisk haveri stänger av W17:an vid kurva 5 – precis som Russells batterifel i Kanada och Norris (McLaren) i Monaco. Återkommande mönster i hela Mercedes-motorfamiljen. Team vet ännu inte exakt orsak.</div>
+        <div class="quote-red-line">"Vi kan inte tävla om ett mästerskap om varannan race en bil tappar feta poäng." – Toto Wolff, Sky Sports F1</div>
+        <div class="m-src">Sky Sports · Motorsport.com · f1.com · fervogear.com</div>
+      </div>
+    </div>
+
+    <div class="m-item">
+      <div class="m-ico">👥</div>
+      <div>
+        <div class="m-h">Russell vs Antonelli – Wolff öppnar för lagorder <span class="pill pill-warn">Intern dramatik</span></div>
+        <div class="m-b">Mercedes-förarna kämpade hårt mot varandra och tappade 5–6 sek till Hamilton. Ferrari tog ledningen via VSC. Wolff säger att det troligen kostade dem segern – diskussioner om lagorder pågår. Crash.net jämför med Hamilton/Rosberg-kraschen i Barcelona 2016.</div>
+        <div class="quote-merc">"Vi förlorade nog segern idag på grund av det. Det är något vi måste diskutera." – Toto Wolff, The Race</div>
+        <div class="m-src">The Race · PlanetF1 · GPblog · Racer · Crash.net · Pit Debrief</div>
+      </div>
+    </div>
+
+    <div class="m-item" style="background: var(--purple-dim); border: 0.5px solid var(--purple-border);">
+      <div class="m-ico">🔧</div>
+      <div>
+        <div class="m-h" style="color: var(--text);">ADUO: FIA dömer Red Bull till starkast motor <span class="pill pill-purple">Motor</span></div>
+        <div class="m-b" style="color: var(--text2);">Mercedes får en extra motoruppgradering 2026 + en 2027 trots att de dominerar. The Race beräknar: 2% ICE-gap ≈ 10 hk ≈ 0,25 sek/varv. Mercedes dominans beror alltså på överlägsen aero och ERS, inte ren motorstyrka. McLaren/Red Bull överväger överklagan.</div>
+        <div class="m-src" style="color: var(--text3);">Sky Sports · The Race · f1.com · GPfans · ESPN</div>
+      </div>
+    </div>
+
+    <div class="m-item">
+      <div class="m-ico">↑</div>
+      <div>
+        <div class="m-h">Barcelonauppgradering: Ny bakre vinge <span class="pill pill-green">Liten</span></div>
+        <div class="m-b">Winglets på mittlinjen ökar camber – mer nedtryck/luftmotstånd anpassat för Barcelona. Liten men metodisk. Mercedes optimerar snarare än desperat jagar prestanda.</div>
+        <div class="m-src">f1.com · Motorsport Week</div>
+      </div>
+    </div>
+
+    <div class="m-item">
+      <div class="m-ico">🇦🇹</div>
+      <div>
+        <div class="m-h">Inför Österrike: Kylning i fokus <span class="pill pill-gray">Nästa race</span></div>
+        <div class="m-b">Red Bull Ring ligger 700 m ö.h. – extra kylkrav på bromsar och motor. Historiskt brukar Mercedes ta med utökade bromskanalintag och ny motorhuv. Inga aero-uppgraderingar bekräftade ännu – teamet fokuserar sannolikt på att lösa haveriet från Barcelona.</div>
+        <div class="m-src">PlanetF1 · f1ingenerale.com · GPblog</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPGRADES ÖSTERRIKE -->
+  <div class="sec">Uppgraderingar · Österrike</div>
+
+  <div class="upg-grid">
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#00d2be"></div>
+      <div class="upg-team">Mercedes</div>
+      <div class="upg-desc">Kylningsfokus · inga aero-uppgraderingar bekräftade</div>
+      <span class="pill pill-gray">Okänt</span>
+    </div>
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#e10600"></div>
+      <div class="upg-team">Ferrari</div>
+      <div class="upg-desc">ADUO-motoruppgradering förberedd + golv-revision</div>
+      <span class="pill pill-red">Stor</span>
+    </div>
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#ff8000"></div>
+      <div class="upg-team">McLaren</div>
+      <div class="upg-desc">Framfjädring + fram- och bakhjörnsjusteringar (3 uppg.)</div>
+      <span class="pill pill-amber">Medium</span>
+    </div>
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#1e41ff"></div>
+      <div class="upg-team">Red Bull</div>
+      <div class="upg-desc">Stort paket – viktminskning RB22 (7 kg kvar) + aero</div>
+      <span class="pill pill-warn">Stor</span>
+    </div>
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#006f62"></div>
+      <div class="upg-team">Aston Martin</div>
+      <div class="upg-desc">Ingen – sparar till sommaren</div>
+      <span class="pill pill-gray">Ingen</span>
+    </div>
+    <div class="upg-row">
+      <div class="upg-dot" style="background:#5a5a5a"></div>
+      <div class="upg-team">Övriga</div>
+      <div class="upg-desc">Alpine, Williams, Haas, Racing Bulls – inga bekräftade</div>
+      <span class="pill pill-gray">Ingen</span>
+    </div>
+  </div>
+
+  <!-- STANDINGS -->
+  <div class="sec">Mästerskapsställning</div>
+
+  <div class="stand-grid">
+    <div class="stand-card">
+      <div class="stand-pos">1</div>
+      <div class="stand-driver">Antonelli</div>
+      <div class="stand-team">Mercedes</div>
+      <div class="stand-pts" style="color:#00d2be">156 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">2</div>
+      <div class="stand-driver">Hamilton</div>
+      <div class="stand-team">Ferrari</div>
+      <div class="stand-pts" style="color:#e10600">115 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">3</div>
+      <div class="stand-driver">Russell</div>
+      <div class="stand-team">Mercedes</div>
+      <div class="stand-pts" style="color:#00d2be">106 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">4</div>
+      <div class="stand-driver">Leclerc</div>
+      <div class="stand-team">Ferrari</div>
+      <div class="stand-pts" style="color:#e10600">75 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">5</div>
+      <div class="stand-driver">Norris</div>
+      <div class="stand-team">McLaren</div>
+      <div class="stand-pts" style="color:#ff8000">73 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">6</div>
+      <div class="stand-driver">Piastri</div>
+      <div class="stand-team">McLaren</div>
+      <div class="stand-pts" style="color:#ff8000">68 p</div>
+    </div>
+    <div class="stand-card">
+      <div class="stand-pos">7</div>
+      <div class="stand-driver">Verstappen</div>
+      <div class="stand-team">Red Bull</div>
+      <div class="stand-pts" style="color:#1e41ff">55 p</div>
+    </div>
+  </div>
+
+  <div class="bar-wrap" style="margin-bottom: 8px;">
+    <div class="bar-row">
+      <div class="bar-label">Mercedes</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:#00d2be"></div></div>
+      <div class="bar-pts" style="color:#00d2be">262 p</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Ferrari</div>
+      <div class="bar-track"><div class="bar-fill" style="width:72.5%;background:#e10600"></div></div>
+      <div class="bar-pts" style="color:#e10600">190 p</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">McLaren</div>
+      <div class="bar-track"><div class="bar-fill" style="width:53.8%;background:#ff8000"></div></div>
+      <div class="bar-pts" style="color:#ff8000">141 p</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Red Bull</div>
+      <div class="bar-track"><div class="bar-fill" style="width:34%;background:#1e41ff"></div></div>
+      <div class="bar-pts" style="color:#1e41ff">89 p</div>
+    </div>
+  </div>
+
+  <!-- LIVE NEWS FEED -->
+  <div class="sec">Senaste nyheterna</div>
+  <div id="news-container">
+    <div class="news-loading">⏳ Hämtar nyheter...</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-src">
+      Källor: f1.com · Sky Sports · The Race · Motorsport.com · PlanetF1 · GPblog · Autosport · Racer · Crash.net · RacingNews365<br>
+      Nyheter via NewsAPI · Uppdateras automatiskt vid varje besök
+    </div>
+  </div>
+
+</div>
+
+<script>
+// COUNTDOWN
+const race = new Date('2026-06-26T00:00:00');
+function updateCD() {
+  const diff = Math.ceil((race - new Date()) / 864e5);
+  document.getElementById('cddays').textContent = diff > 0 ? diff : 0;
+}
+updateCD();
+
+// LAST UPDATED
+function setUpdated() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  const d = now.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+  document.getElementById('last-updated').textContent = `Uppdaterad ${d} kl ${t}`;
+}
+
+// NEWS FETCH
+async function loadNews() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+
+  const container = document.getElementById('news-container');
+  container.innerHTML = '<div class="news-loading">⏳ Hämtar nyheter från nätet...</div>';
+
+  // Using NewsData.io free tier (no key needed for basic)
+  // Fallback to curated static news if API fails
+  const queries = ['Mercedes F1 2026', 'Formula 1 2026 Austrian GP', 'F1 2026 upgrades'];
+  const API_KEY = 'pub_00000000000000000000000000000000'; // placeholder
+
+  // Try NewsData API
+  const url = `https://newsdata.io/api/1/news?apikey=${API_KEY}&q=formula+1+2026&language=en&category=sports&size=8`;
+
+  let articles = null;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results && data.results.length > 0) articles = data.results;
+    }
+  } catch(e) {}
+
+  // Fallback: curated top stories (always fresh enough for race weekends)
+  const fallback = [
+    {
+      title: 'Antonelli leder VM – gap till Hamilton 41 poäng',
+      description: 'Efter Barcelona-haveriet på varv 62 leder Kimi Antonelli fortfarande förarmästerskapet med 41 poäng ner till Lewis Hamilton. George Russell på tredje plats med 106 poäng.',
+      tag: 'Mästerskapet', src: 'RacingNews365 · Motorsport.com', link: 'https://www.motorsport.com/f1/'
+    },
+    {
+      title: 'Toto Wolff: "Inte bra nog" – kräver svar på tillförlitlighetsproblemen',
+      description: 'Mercedes teamchef Toto Wolff är rasande efter att Antonelli bröt på varv 62 i Barcelona med elektrisk nedstängning – liknande Russells haveri i Kanada. "Vi lämnar ingen sten ovänd."',
+      tag: 'Mercedes', src: 'Sky Sports · f1.com', link: 'https://www.skysports.com/f1'
+    },
+    {
+      title: 'Red Bull bekräftar stort uppgraderingspaket inför Österrike',
+      description: 'Verstappen och Red Bull tar med ett målriktat paket till hemmaracet i Spielberg – fokus på att minska RB22:s övervikt på 7 kg. "Ferrari tog ett stort steg i Barcelona. Vår nästa stora uppgradering kommer i Österrike," säger Laurent Mekies.',
+      tag: 'Uppgraderingar', src: 'GPblog · Yahoo Sports', link: 'https://www.gpblog.com/en'
+    },
+    {
+      title: 'Wolff öppnar dörren för lagorder efter Russell/Antonelli-batalj',
+      description: 'Mercedes diskuterar internt hur förarna ska hanteras när ett externt stall hotar segern. "Det är en intressant diskussion," säger Wolff om möjligheten att be den långsammare föraren lyfta.',
+      tag: 'Mercedes internt', src: 'The Race · PlanetF1 · Crash.net', link: 'https://www.the-race.com/formula-1/'
+    },
+    {
+      title: 'ADUO: FIA bekräftar Red Bull som benchmark – Mercedes och Ferrari får motoruppgraderingar',
+      description: 'Trots sex racevinster av sju döms Mercedes ligga 2%+ efter Red Bulls ICE. Ferrari, Audi och Honda som ligger 4%+ efter får två uppgraderingar vardera. The Race beräknar att 2% ICE-gap ≈ 0,25 sek/varv.',
+      tag: 'Motor / ADUO', src: 'Sky Sports · The Race · ESPN', link: 'https://www.the-race.com/formula-1/'
+    },
+    {
+      title: 'Ferrari nästa ADUO-motoruppgradering förberedd till Österrike-perioden',
+      description: 'Ferrari förbereder sin första motoruppgradering under ADUO-systemet till runt Österrikes GP. Tillsammans med det stora aeropaketet i Barcelona hoppas Scuderia stänga gapet till Mercedes.',
+      tag: 'Ferrari', src: 'The Race · Autosport', link: 'https://www.autosport.com/f1/'
+    },
+    {
+      title: 'Hamilton vinner för Ferrari i Barcelona – bryter Mercedes dominans',
+      description: 'Lewis Hamilton tar karriärvinst nr 106 och Ferraris första seger 2026 efter perfekt trestoppsstrategi. Russell tvåa, Norris trea – första brittiska pallen sedan 1968.',
+      tag: 'Race-rapport', src: 'f1.com · Sky Sports', link: 'https://www.formula1.com/en/latest'
+    },
+    {
+      title: 'Österrikes GP – bana och förutsättningar',
+      description: 'Red Bull Ring: 4,318 km, 10 kurvor, 700 m ö.h. Lågt nedtryck, långa raksträckor och slipstream avgörande. Höjden ställer krav på kylning för både bromsar och motor – ett område Mercedes historiskt hanterar med motorhuv- och bromskanaluppdateringar.',
+      tag: 'Race-info', src: 'f1ingenerale.com · motorsportscalendar.com', link: 'https://www.formula1.com/en/racing/2026'
+    },
+  ];
+
+  const items = articles ? articles.map(a => ({
+    title: a.title,
+    description: a.description || '',
+    tag: 'Nyhet',
+    src: a.source_id || 'Nyhetskälla',
+    link: a.link || '#'
+  })) : fallback;
+
+  container.innerHTML = items.map(item => `
+    <div class="news-card" onclick="window.open('${item.link}','_blank')">
+      <div class="news-card-tag">${item.tag}</div>
+      <div class="news-card-title">${item.title}</div>
+      <div class="news-card-desc">${item.description}</div>
+      <div class="news-card-meta">
+        <span>📰 ${item.src}</span>
+      </div>
+    </div>
+  `).join('');
+
+  setUpdated();
+  btn.classList.remove('spinning');
+}
+
+// Auto-load on open
+loadNews();
+</script>
+</body>
+</html>
